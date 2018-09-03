@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tweet", "Assembly-CSharp.csproj", "{DA74F76A-65DB-8C0A-BE48-9FB5C1D64D12}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA74F76A-65DB-8C0A-BE48-9FB5C1D64D12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA74F76A-65DB-8C0A-BE48-9FB5C1D64D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA74F76A-65DB-8C0A-BE48-9FB5C1D64D12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA74F76A-65DB-8C0A-BE48-9FB5C1D64D12}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
