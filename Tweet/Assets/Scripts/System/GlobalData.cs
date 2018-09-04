@@ -31,5 +31,26 @@ public class GlobalData {
         "啾啾啾啾啾",
         "啾啾啾啾啾啾"
     };
-    //
+
+    //物品生成概率数组 列表，随时间增长，难度级别升高，概率发生变化
+    public static List<int[]> GoodsRateListByLevel = new List<int[]>()
+    {
+        new int[]{ 40, 30, 30 },
+        new int[]{ },
+        new int[]{ }
+    };
+    //障碍生成概率数组 列表
+    public static List<int[]> BarrierRateListByLevel = new List<int[]>()
+    {
+        new int[]{ 50, 30, 10, 7, 3 },
+        new int[]{ },
+        new int[]{ }
+    };
+    //道具生成概率数组 列表
+    public static List<int[]> PropRateListByLevel = new List<int[]>()
+    {
+        new int[]{ 12, 12, 12, 14, 50},
+        new int[]{ },
+        new int[]{ }
+    };
 }

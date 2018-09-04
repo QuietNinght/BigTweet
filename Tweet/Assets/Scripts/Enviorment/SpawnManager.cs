@@ -42,11 +42,11 @@ public class SpawnManager : MonoBehaviour {
     //游戏道具类型
     public enum PropType
     {
-        Cooky,          //姜饼饼干，增加主角元件
         Doughunt,       //甜甜圈，护盾 +　爆炸（销毁整行障碍）
-        Lollipop,       //棒棒糖，开启主角的攻击
         Chocolate,      //巧克力，冲刺
+        Lollipop,       //棒棒糖，开启主角的攻击
         Bread,          //U型面包，磁铁功能
+        Cooky,          //姜饼饼干，增加主角元件
         Count,          //其它      
     }
     //道具 类型-prefab 字典
@@ -194,7 +194,7 @@ public class SpawnManager : MonoBehaviour {
         GoodsSpawnRateArr = new int[] { 40, 30, 30 };
         //初始化道具生成概率数组
         //饼干，甜甜圈，棒棒糖，面包，巧克力的生成概率：
-        PropSpawnRateArr = new int[] { 50, 12, 12, 12, 14 };
+        PropSpawnRateArr = new int[] { 12, 12, 12, 14, 50};
         //初始化障碍生成概率数组
         //障碍1,2,3,4,5的生成概率
         BarrierSpawnRateArr = new int[] { 50, 30, 10, 7, 3 };

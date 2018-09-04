@@ -5,8 +5,9 @@ using UnityEngine;
 /******************************************************
  * 主角的功能脚本
  ******************************************************/
-public class Player : MonoBehaviour {
-    
+public class Player : MonoBehaviour
+{
+
     [Header("Cell")]
     public GameObject cellPre;                  //元件的prefab
     public List<Cell> cellList;                 //主角身后的元件列表
@@ -18,7 +19,8 @@ public class Player : MonoBehaviour {
     [Header("Property")]
     public bool GodMode;                        //是否处于无敌状态
 
-    public Vector3 propNumOffest;               //数字文本相对自身的偏移量
+    public Transform propNumPoint;              //数字文本的对焦中心
+    public Transform firePoint;                 //远程攻击开火点
 
     protected float magentDuartionRate = 0;     //影响磁铁持续时间的比率值
     protected float shieldDuartionRate = 0;     //影响护盾持续时间的比率值
@@ -31,14 +33,18 @@ public class Player : MonoBehaviour {
     public int maxHitCount;                     //可同时碰撞障碍的最大个数
     protected int currentHitCount;
 
-    public enum SkillType                      //主角的攻击技能种类
+    public enum SkillType                       //主角的攻击技能种类
     {
         Melee,      //近战
         Range,      //远程
         All,        //全能
         None
     }
-    public SkillType attackType;
+    public SkillType skillType;
+
+    public GameObject bulletPrefab;             //子弹prefab
+    public float rangeSkillCoolTime;            //远程攻击的冷却时间
+    private float timer;
 
     [Header("Move")]
     public float moveXSpeed;                    //主角左右移动的速度
@@ -82,7 +88,8 @@ public class Player : MonoBehaviour {
         mTransform = transform;
     }
 
-    protected virtual void Start () {
+    protected virtual void Start()
+    {
         //记录初始速度
         initialMoveYSpeed = moveYSpeed;
         //计算主角移动的最小最大范围
@@ -93,7 +100,7 @@ public class Player : MonoBehaviour {
         currentHitCount = maxHitCount;
 
         //生成一个PropNum，显示主角的元件数量
-        cellNum = GameManager.Instance.CreatePropNum(mTransform, propNumOffest, initialCellCount);
+        cellNum = GameManager.Instance.CreatePropNum(propNumPoint, Vector3.zero, initialCellCount);
         cellNum.SetColor(Color.yellow);
         cellNum.SetSize(50);
 
@@ -107,9 +114,10 @@ public class Player : MonoBehaviour {
         //激活被动技能
         PassiveSkill();
     }
-	
+
     //在Update函数中进行速度的更新
-	protected virtual void Update () {
+    protected virtual void Update()
+    {
         if (isPlaying)
         {
             //检测玩家输入
@@ -124,9 +132,9 @@ public class Player : MonoBehaviour {
             velocity.y = moveYSpeed;
 
             //判断是否启用远程攻击技能
-            if (isSkill && attackType == SkillType.Range)
+            if (isSkill && (skillType == SkillType.Range || skillType == SkillType.All))
             {
-                RangeAttack();
+                RangeSkill();
             }
         }
     }
@@ -285,7 +293,7 @@ public class Player : MonoBehaviour {
     //增加指定个数的元件
     public void AddCell(int _num)
     {
-        for(int i = 0; i < _num; i++)
+        for (int i = 0; i < _num; i++)
         {
             //生成一个元件
             var newCell = Instantiate(cellPre, mTransform.parent).GetComponent<Cell>();
@@ -307,11 +315,11 @@ public class Player : MonoBehaviour {
             //Debug.Log("newCell的位置：" + posY);
 
             //初始化该元件,如果是第一元件，其跟随目标为主角，否则为其前一个元件
-            if(cellList.Count == 0)
+            if (cellList.Count == 0)
             {
                 newCell.Init(mTransform, basePos);
             }
-            else if(cellList.Count > 0)
+            else if (cellList.Count > 0)
             {
                 newCell.Init(cellList[cellList.Count - 1].transform, cellSpaceOffest);
             }
@@ -327,13 +335,13 @@ public class Player : MonoBehaviour {
     //删除指定个数的元件
     public void DelCell(int _num)
     {
-        if(_num > cellList.Count)
+        if (_num > cellList.Count)
         {
             Debug.LogError("------------- 指定要删除的元件个数不正确 -------------");
             return;
         }
 
-        for(int i = 0; i < cellList.Count; i++)
+        for (int i = 0; i < cellList.Count; i++)
         {
             RemoveCell();
         }
@@ -435,9 +443,9 @@ public class Player : MonoBehaviour {
             //调用障碍的被伤害函数
             barrier.OnDamage(damage, gameObject);
             //判断是否启用技能
-            if (isSkill && (attackType == SkillType.Melee || attackType == SkillType.All))
+            if (isSkill && (skillType == SkillType.Melee || skillType == SkillType.All))
             {
-                MeleeAttack(barrier);
+                MeleeSkill(barrier);
             }
 
             yield return new WaitForSeconds(attackSpaceTime);
@@ -450,12 +458,12 @@ public class Player : MonoBehaviour {
     }
 
     //近战技能（不同角色根据攻击种类不同，需重写该函数
-    protected virtual void MeleeAttack(Barrier victim)
+    protected virtual void MeleeSkill(Barrier victim)
     {
         //测试用近战技能，同时攻击对象的左右障碍
         Transform line = victim.transform.parent;
         Barrier[] lineBarriers = line.GetComponentsInChildren<Barrier>();
-        foreach(Barrier implicate in lineBarriers)
+        foreach (Barrier implicate in lineBarriers)
         {
             //安全检测，确认得到的障碍与被撞击的障碍处于同一行
             if (implicate.Y == victim.Y)
@@ -472,10 +480,17 @@ public class Player : MonoBehaviour {
     }
 
     //远程技能（不同角色根据攻击种类不同，需重写该函数
-    protected virtual void RangeAttack()
+    protected virtual void RangeSkill()
     {
         //测试用远程技能，发射子弹进行攻击
-
+        timer += Time.deltaTime;
+        if (timer >= rangeSkillCoolTime)
+        {
+            timer = 0;
+            //在开火点生成一颗子弹
+            Bullet bullet = (Bullet)Instantiate(bulletPrefab, firePoint.position, Quaternion.identity).GetComponent(typeof(Bullet));
+            bullet.Init(gameObject, Vector2.up, Vector2.up);
+        }
     }
 
     //被动技能（不同角色被动技能不同，需重写该函数
@@ -490,7 +505,7 @@ public class Player : MonoBehaviour {
     protected void OnTriggerEnter2D(Collider2D other)
     {
         var barrier = other.GetComponent<Barrier>();
-        if(barrier != null)
+        if (barrier != null)
         {
             Attack(barrier);
         }
@@ -502,7 +517,7 @@ public class Player : MonoBehaviour {
         if (barrier != null)
         {
             //
-            if(isHitting == false)
+            if (isHitting == false)
             {
                 Attack(barrier);
             }
