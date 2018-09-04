@@ -8,6 +8,7 @@ using UnityEngine;
 public class HomeMenu_PlayerInfo : MonoBehaviour
 {
 
+    public string playerName;
     public int playerID;
     public int price;
     public string introduce;

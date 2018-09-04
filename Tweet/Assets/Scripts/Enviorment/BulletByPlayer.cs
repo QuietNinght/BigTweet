@@ -51,7 +51,6 @@ public class BulletByPlayer : Bullet {
         //如果碰撞到非指定攻击对象
         if ((LayerCollision.value & (1 << other.gameObject.layer)) == 0)
         {
-            Debug.Log("碰到非指定攻击对象");
             OnNotCollideWith(other);
             return;
         }
@@ -60,20 +59,17 @@ public class BulletByPlayer : Bullet {
         var isOwner = Owner == other.gameObject;
         if (isOwner)
         {
-            Debug.Log("碰到发射者");
             OnCollideOwner();
             return;
         }
 
         if (other.GetComponent<Barrier>() != null)
         {
-            Debug.Log("碰到障碍");
             OnCollideTarget(other);
             return;
         }
         else
         {
-            Debug.Log("碰到其它攻击对象：" + other.name);
             OnCollideOther(other);
             return;
         }

@@ -479,6 +479,9 @@ MonoBehaviour:
   cellSpaceOffest: 0.6
   initialCellCount: 10
   GodMode: 1
+  maxEnergy: 20
+  sprintDuration: 5
+  sprintSpeed: 4
   propNumPoint: {fileID: 4860939051440952}
   firePoint: {fileID: 4773128615150834}
   damage: 1

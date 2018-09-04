@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 /******************************************************
  * 主角的功能脚本
@@ -18,6 +19,11 @@ public class Player : MonoBehaviour
 
     [Header("Property")]
     public bool GodMode;                        //是否处于无敌状态
+    public float maxEnergy;
+    public float Energy { get; set; }
+    public float sprintDuration;
+    public float sprintSpeed;
+    private bool isEnergyGrouping = true;
 
     public Transform propNumPoint;              //数字文本的对焦中心
     public Transform firePoint;                 //远程攻击开火点
@@ -90,6 +96,8 @@ public class Player : MonoBehaviour
 
     protected virtual void Start()
     {
+        Energy = 0;
+
         //记录初始速度
         initialMoveYSpeed = moveYSpeed;
         //计算主角移动的最小最大范围
@@ -127,9 +135,11 @@ public class Player : MonoBehaviour
             float targetVelocityX = input.x * moveXSpeed;
             //一个短暂的加速过程
             velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, accelerationTime);
-
             //暂时没有垂直方向的移动
             velocity.y = moveYSpeed;
+
+            //检测主角的能量变化
+            HandleEnergy();
 
             //判断是否启用远程攻击技能
             if (isSkill && (skillType == SkillType.Range || skillType == SkillType.All))
@@ -172,6 +182,28 @@ public class Player : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             StopMove();
+        }
+    }
+
+    //检测主角能量增长
+    protected virtual void HandleEnergy()
+    {
+        if (isEnergyGrouping)
+        {
+            Energy += Time.deltaTime;
+            if (Energy >= maxEnergy)
+            {
+                Debug.Log("能量条蓄力完成");
+                //主角开启冲刺状态
+                OpenSprint(sprintDuration, sprintSpeed);
+                isEnergyGrouping = false;
+                //能量条归零的动画，动画完成后再次开启能量的增长
+                DOTween.To(() => Energy, r => Energy = r, 0, sprintDuration * (1+sprintDuartionRate)).OnComplete(() =>
+                {
+                    Debug.Log("能量条清零完成");
+                    isEnergyGrouping = true;
+                });
+            }
         }
     }
 

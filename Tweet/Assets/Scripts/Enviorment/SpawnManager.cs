@@ -22,6 +22,8 @@ public class SpawnManager : MonoBehaviour {
     public float lineSpace;                 //行与行的间距
     private int currentLine;                //当前物品行数
     private float gameTimer;                //记录游戏持续时间
+    private bool isRefreshRate = true;      //标记是否更新概率数组
+    private int refreshRateRuncount = 1;    //更新概率数组操作的执行次数
 
     //第一种方式，按照时间进行生成
     private float spawnIntervalTime;        //每一行游戏物品的生成时间间隔（根据主角的速度进行减少，1/speed）
@@ -104,57 +106,90 @@ public class SpawnManager : MonoBehaviour {
 
     void Update()
     {
-        //spawnIntervalTime = (1 / player.moveYSpeed) > 0 ? (1 / player.moveYSpeed) : 0.5f ;
-        /*
-        gameTimer += Time.deltaTime;
-        int level = (int)gameTimer / 10;
-        switch (level)
+        if (isRefreshRate)
         {
-            case 0:
-            case 1:
-                //更新物品生成概率数组(每一行的各物品生成概率相同)
-                //不生成，生成障碍，生成道具的概率
-                GoodsSpawnRateArr = new int[] { 40, 30, 30 };
-                //更新道具生成概率数组
-                //饼干，甜甜圈，棒棒糖，巧克力，面包的生成概率：
-                PropSpawnRateArr = new int[] { 50, 12, 12, 12, 14 };
-                //更新障碍生成概率数组
-                //障碍1,2,3,4,5的生成概率
-                BarrierSpawnRateArr = new int[] { 50, 30, 10, 7, 3 };
-                //更新栏杆生成概率数组
-                RailSpawnRateArr = new int[] { 50, 30, 15, 3, 2 };
-                break;
-            case 2:
-                Utils.RefreshRateArr(ref GoodsSpawnRateArr, 1, 40);
+            switch ((int)(Time.time - gameTimer))
+            {
+                case 20:
+                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[1];
+                    PropSpawnRateArr = GlobalData.PropRateListByLevel[1];
+                    BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[1];
+                    break;
+                case 30:
+                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[2];
+                    PropSpawnRateArr = GlobalData.PropRateListByLevel[2];
+                    BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[2];
+                    break;
+                case 40:
+                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[3];
+                    isRefreshRate = false;
+                    break;
+                default:
+                    break;
+            }
+        }
 
-                PropSpawnRateArr = new int[] { 50, 11, 14, 11, 14 };
-
-                BarrierSpawnRateArr = new int[] { 40, 20, 24, 10, 6 };
-
-                RailSpawnRateArr = new int[] { 50, 30, 15, 3, 2 };
-                break;
-            default:
-                Utils.RefreshRateArr(ref GoodsSpawnRateArr, 1, 50);
-
-                PropSpawnRateArr = new int[] { 50, 10, 11, 8, 21 };
-
-                break;              
-        }*/
+        //Debug.Log("物品生成概率数组中障碍的生成概率：" + GoodsSpawnRateArr[1]);
 
         if(Time.time - propTimer >= spawnPropLimitTime)
         {
             currentPropCount = 0;
             propTimer = Time.time;
-
-            //暂时在这里设置，随着时间的增加，物品的生成概率发生变化
-
         }
 
+        HandleSpawn();
+    }
+
+    public void Init()
+    {
+        gameTimer = Time.time;
+        propTimer = Time.time;
+        previousPlayerPos = player.mTransform.position;
+
+        nextFullBarrierLine = UnityEngine.Random.Range(minFullSpace, maxFullSpace + 1);
+
+        //初始化物品生成概率数组(每一行的各物品生成概率相同)
+        //不生成，生成障碍，生成道具的概率：40%，30%，30%
+        GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[0];
+        //初始化道具生成概率数组
+        //饼干，甜甜圈，棒棒糖，面包，巧克力的生成概率：
+        PropSpawnRateArr = GlobalData.PropRateListByLevel[0];
+        //初始化障碍生成概率数组
+        //障碍1,2,3,4,5的生成概率
+        BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[0];
+        //初始化栏杆生成概率数组
+        RailSpawnRateArr = GlobalData.RailRateListByLevel[0];
+
+
+
+        //初始化 道具 字典
+        PropTypeDic = new Dictionary<PropType, GameObject>();
+        for(int i = 0; i < PropPrefabsArr.Length; i++)
+        {
+            if(PropTypeDic.ContainsKey(PropPrefabsArr[i].type) == false)
+            {
+                PropTypeDic.Add(PropPrefabsArr[i].type, PropPrefabsArr[i].prefab);
+            }
+        }
+
+        //初始化下一个可生成栏杆的位置点列表
+        NextSpawnRailPosList = new Dictionary<int, int>();
+        //根据道路边数量来计算并限制可生成栏杆的列数（最边上的两列不能生成栏杆
+        var railLimit = (trackCount + 1) / 2 - 1;
+        for(int i = -railLimit; i <= railLimit; i++)
+        {
+            NextSpawnRailPosList.Add(i, 0);
+        }
+    }
+
+    //检测进行游戏物体的生成
+    private void HandleSpawn()
+    {
         if (player.mTransform.position.y - previousPlayerPos.y >= initialCheckShift)
         {
-            if(currentLine >= nextFullBarrierLine)
+            if (currentLine >= nextFullBarrierLine)
             {
-                if(player.GetCellCount() == 0)
+                if (player.GetCellCount() == 0)
                 {
                     //生成一行物品
                     SpawnSingleLine();
@@ -179,53 +214,29 @@ public class SpawnManager : MonoBehaviour {
             currentLine++;
             previousPlayerPos = player.mTransform.position;
         }
-
     }
 
-    public void Init()
+    private void RefreshRatearr()
     {
-        propTimer = Time.time;
-        previousPlayerPos = player.mTransform.position;
-
-        nextFullBarrierLine = UnityEngine.Random.Range(minFullSpace, maxFullSpace + 1);
-
-        //初始化物品生成概率数组(每一行的各物品生成概率相同)
-        //不生成，生成障碍，生成道具的概率：40%，30%，30%
-        GoodsSpawnRateArr = new int[] { 40, 30, 30 };
-        //初始化道具生成概率数组
-        //饼干，甜甜圈，棒棒糖，面包，巧克力的生成概率：
-        PropSpawnRateArr = new int[] { 12, 12, 12, 14, 50};
-        //初始化障碍生成概率数组
-        //障碍1,2,3,4,5的生成概率
-        BarrierSpawnRateArr = new int[] { 50, 30, 10, 7, 3 };
-        //初始化栏杆生成概率数组
-        RailSpawnRateArr = new int[] { 50, 30, 15, 3, 2 };
-
-        //初始化 道具 字典
-        PropTypeDic = new Dictionary<PropType, GameObject>();
-        for(int i = 0; i < PropPrefabsArr.Length; i++)
+        switch (refreshRateRuncount)
         {
-            if(PropTypeDic.ContainsKey(PropPrefabsArr[i].type) == false)
-            {
-                PropTypeDic.Add(PropPrefabsArr[i].type, PropPrefabsArr[i].prefab);
-            }
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            default:
+                break;
         }
-
-        //初始化下一个可生成栏杆的位置点列表
-        NextSpawnRailPosList = new Dictionary<int, int>();
-        //根据道路边数量来计算并限制可生成栏杆的列数（最边上的两列不能生成栏杆
-        var railLimit = (trackCount + 1) / 2 - 1;
-        for(int i = -railLimit; i <= railLimit; i++)
-        {
-            NextSpawnRailPosList.Add(i, 0);
-        }
+        refreshRateRuncount++;
     }
 
     //生成一排游戏物品
     private void SpawnSingleLine()
     {
         //开始生成时，获取物品生成概率数组(每一行的各物品生成概率相同)
-        int[] goodsSpawnRateArr = new int[] { 40, 30, 30 };
+        int[] goodsSpawnRateArr = (int[])GoodsSpawnRateArr.Clone();
 
         float screenWidthWorldPos = Camera.main.orthographicSize * Screen.width / Screen.height;
         float distBetweenBlocks = screenWidthWorldPos / trackCount;
@@ -249,7 +260,7 @@ public class SpawnManager : MonoBehaviour {
             //如果是在上一个生成障碍的行的上面一行，障碍生成概率减为1/6
             if (spaceOfpreBarrierLine == 1)
             {
-                Utils.RefreshRateArr(ref goodsSpawnRateArr, 1, goodsSpawnRateArr[1] / 8);
+                Utils.RefreshRateArr(ref goodsSpawnRateArr, 1, goodsSpawnRateArr[1] / 4);
             }
             //如果是在上一个生成障碍的行的上面两行，障碍生成概率减半
             else if (spaceOfpreBarrierLine == 2)

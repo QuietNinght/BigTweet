@@ -14,12 +14,12 @@ public class GameManager : MonoBehaviour {
         get { return instance; }
     }
     [Header("Proporty")]
-    public float maxEnergy;
-    public float Energy { get; set; }
-    public float sprintDuration;
-    public float sprintSpeed;
-    public float energyClearTime;
-    private bool isEnergyGrouping = true;
+    //public float maxEnergy;
+    //public float Energy { get; set; }
+    //public float sprintDuration;
+    //public float sprintSpeed;
+    //public float energyClearTime;
+    //private bool isEnergyGrouping = true;
 
     [Header("Player")]
     public Vector3 basePos;
@@ -66,23 +66,6 @@ public class GameManager : MonoBehaviour {
 
     void Update()
     {
-        if (isEnergyGrouping)
-        {
-            Energy += Time.deltaTime;
-            if (Energy >= maxEnergy)
-            {
-                Debug.Log("能量条蓄力完成");
-                //主角开启冲刺状态
-                //player.OpenSprint(sprintDuration, sprintSpeed);
-                isEnergyGrouping = false;
-                //能量条归零的动画，动画完成后再次开启能量的增长
-                DOTween.To(() => Energy, r => Energy = r, 0, energyClearTime).OnComplete(() =>
-                {
-                    Debug.Log("能量条清零完成");
-                    isEnergyGrouping = true;
-                });
-            }
-        }
 
     }
 
@@ -104,8 +87,6 @@ public class GameManager : MonoBehaviour {
         mCamera.GetComponent<CameraMove>().isFollowing = true;
         player.isPlaying = true;
 
-        //初始化能量为0
-        Energy = 0;
         //初始化游戏内容完毕
 
         //播发音乐

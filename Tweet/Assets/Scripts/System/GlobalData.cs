@@ -10,6 +10,7 @@ public class GlobalData {
     //音乐，音效 开关
     public static string MusicSwitch = "MusicSwitch";        //背景音乐开关
     public static string SoundSwitch = "SoundSwitch";        //音效开关
+    public static string ShockSwitch = "ShockSwitch";        //震动开关
 
     //最高分
     public static string HighestScore = "HighestScore";
@@ -36,21 +37,27 @@ public class GlobalData {
     public static List<int[]> GoodsRateListByLevel = new List<int[]>()
     {
         new int[]{ 40, 30, 30 },
-        new int[]{ },
-        new int[]{ }
+        new int[]{ 30, 40, 30 },
+        new int[]{ 20, 50, 30 },
+        new int[]{ 20, 60, 20 }
     };
     //障碍生成概率数组 列表
     public static List<int[]> BarrierRateListByLevel = new List<int[]>()
     {
         new int[]{ 50, 30, 10, 7, 3 },
-        new int[]{ },
-        new int[]{ }
+        new int[]{ 40, 20, 24, 10,6 },
+        new int[]{ 18, 15, 13, 30, 24}
     };
     //道具生成概率数组 列表
     public static List<int[]> PropRateListByLevel = new List<int[]>()
     {
         new int[]{ 12, 12, 12, 14, 50},
-        new int[]{ },
-        new int[]{ }
+        new int[]{ 11, 11, 14, 14, 50},
+        new int[]{ 10, 8, 11, 21, 50 }
+    };
+    //栏杆生成概率数组 列表
+    public static List<int[]> RailRateListByLevel = new List<int[]>()
+    {
+        new int[]{ 50, 30, 15, 3, 2 }
     };
 }

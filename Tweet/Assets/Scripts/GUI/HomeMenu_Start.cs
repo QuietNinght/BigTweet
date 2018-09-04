@@ -21,6 +21,7 @@ public class HomeMenu_Start : MonoBehaviour {
 
         var playerNum = PlayerPrefs.GetInt(GlobalData.FightPlayer, 0);
         fightPlayerImg.sprite = playerSpriteArr[playerNum];
+        fightPlayerImg.SetNativeSize();
         playerSlogan.text = GlobalData.PlayerSlogan[playerNum];
 	}
 	

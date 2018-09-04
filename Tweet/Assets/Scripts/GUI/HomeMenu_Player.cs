@@ -24,6 +24,7 @@ public class HomeMenu_Player : MonoBehaviour {
     private int currentCoinNum;                 //当前玩家获得的金币
 
     [Header("Charactor Value")]
+    public Text playerNameText;                 //主角姓名文本
     public Text playerIntroduceText;            //主角介绍文本
     public Image playerBackgoundImg;            //主角背景图片
     public Image attackIconImg;                 //主角攻击类型图标
@@ -98,6 +99,7 @@ public class HomeMenu_Player : MonoBehaviour {
     //刷新角色信息显示
     void RefreshPlayerInfoShow()
     {
+        playerNameText.text = playerList[lookedPlayerID].playerName;            //角色名字
         playerIntroduceText.text = playerList[lookedPlayerID].introduce;        //角色介绍
         playerBackgoundImg.sprite = playerList[lookedPlayerID].backGround;      //角色背景图片
 
@@ -211,10 +213,23 @@ public class HomeMenu_Player : MonoBehaviour {
     //点击购买按钮
     public void OnClickBuy()
     {
+        SureBuyPanel.SetActive(true);
+    }
+
+    //确认购买
+    public void OnSureBuy()
+    {
         //判断金币是否足够
         if (HaveEnoughMoney())
         {
-            SureBuyPanel.SetActive(true);
+            //刷新按钮显示：显示可出战按钮
+            RefreshBtnShow(1);
+            //更新玩家金币
+            var newCoin = currentCoinNum - playerList[lookedPlayerID].price;
+            RefreshCoinShow(newCoin);
+            PlayerPrefs.SetInt(GlobalData.Coin, newCoin);
+            //更新角色 是否解锁 存档数据
+            PlayerPrefs.SetInt(GlobalData.PlayerLocked + lookedPlayerID, 1);
         }
         else
         {
@@ -222,17 +237,10 @@ public class HomeMenu_Player : MonoBehaviour {
         }
     }
 
-    //确认购买
-    public void OnSureBuy()
+    //取消购买
+    public void OnCancelBuy()
     {
-        //刷新按钮显示：显示可出战按钮
-        RefreshBtnShow(1);
-        //更新玩家金币
-        var newCoin = currentCoinNum - playerList[lookedPlayerID].price;
-        RefreshCoinShow(newCoin);
-        PlayerPrefs.SetInt(GlobalData.Coin, newCoin);
-        //更新角色 是否解锁 存档数据
-        PlayerPrefs.SetInt(GlobalData.PlayerLocked + lookedPlayerID, 1);
+        SureBuyPanel.SetActive(false);
     }
 
     //关闭弹窗
