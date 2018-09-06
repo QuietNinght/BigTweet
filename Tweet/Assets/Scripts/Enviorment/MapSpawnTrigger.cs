@@ -10,6 +10,7 @@ public class MapSpawnTrigger : MonoBehaviour {
         if(player != null)
         {
             MapManager.Instance.CreateMap();
+            Destroy(gameObject);
         }
     }
 }

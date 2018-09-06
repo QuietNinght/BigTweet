@@ -54,7 +54,10 @@ public class Cell : MonoBehaviour {
 
     void LateUpdate()
     {
-        controller.Move(velocity);
+        if (isMove)
+        {
+            controller.Move(velocity);
+        }
     }
 
     public void Move(Vector3 velocity)

@@ -48,11 +48,6 @@ public class InitSpawn : MonoBehaviour {
         mTransform = transform;
     }
 
-    void Start()
-    {
-        Init();
-    }
-
     public void Init()
     {
         int proCount = Random.Range(1, maxPropCount + 1);

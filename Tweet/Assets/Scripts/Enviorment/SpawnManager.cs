@@ -15,6 +15,8 @@ public class SpawnManager : MonoBehaviour {
     }
 
     [Header("Property")]
+    public bool isOpen = false;
+
     Player player;                          //主角
     Transform mTransform;
 
@@ -93,58 +95,32 @@ public class SpawnManager : MonoBehaviour {
 
     void Awake()
     {
-        player = FindObjectOfType<Player>();
+        //player = FindObjectOfType<Player>();
 
         mTransform = transform;
 
         instance = this;
     }
 
-    void Start()
-    {
-        Init();
-    }
-
     void Update()
     {
-        if (isRefreshRate)
+        if (isOpen)
         {
-            switch ((int)(Time.time - gameTimer))
-            {
-                case 20:
-                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[1];
-                    PropSpawnRateArr = GlobalData.PropRateListByLevel[1];
-                    BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[1];
-                    break;
-                case 30:
-                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[2];
-                    PropSpawnRateArr = GlobalData.PropRateListByLevel[2];
-                    BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[2];
-                    break;
-                case 40:
-                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[3];
-                    isRefreshRate = false;
-                    break;
-                default:
-                    break;
-            }
+            HandleSpawnRate();
+
+            HandleSpawnProp();
+
+            HandleSpawn();
         }
 
-        //Debug.Log("物品生成概率数组中障碍的生成概率：" + GoodsSpawnRateArr[1]);
-
-        if(Time.time - propTimer >= spawnPropLimitTime)
-        {
-            currentPropCount = 0;
-            propTimer = Time.time;
-        }
-
-        HandleSpawn();
     }
 
-    public void Init()
+    public void Init(Player _player)
     {
         gameTimer = Time.time;
         propTimer = Time.time;
+
+        player = _player;
         previousPlayerPos = player.mTransform.position;
 
         nextFullBarrierLine = UnityEngine.Random.Range(minFullSpace, maxFullSpace + 1);
@@ -160,8 +136,6 @@ public class SpawnManager : MonoBehaviour {
         BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[0];
         //初始化栏杆生成概率数组
         RailSpawnRateArr = GlobalData.RailRateListByLevel[0];
-
-
 
         //初始化 道具 字典
         PropTypeDic = new Dictionary<PropType, GameObject>();
@@ -181,6 +155,9 @@ public class SpawnManager : MonoBehaviour {
         {
             NextSpawnRailPosList.Add(i, 0);
         }
+
+        //启动生成器
+        isOpen = true;
     }
 
     //检测进行游戏物体的生成
@@ -190,6 +167,7 @@ public class SpawnManager : MonoBehaviour {
         {
             if (currentLine >= nextFullBarrierLine)
             {
+                //如果主角身后没有元件，则不生成整行障碍
                 if (player.GetCellCount() == 0)
                 {
                     //生成一行物品
@@ -214,6 +192,43 @@ public class SpawnManager : MonoBehaviour {
 
             currentLine++;
             previousPlayerPos = player.mTransform.position;
+        }
+    }
+
+    //控制游戏物品生成概率
+    private void HandleSpawnRate()
+    {
+        if (isRefreshRate)
+        {
+            switch ((int)(Time.time - gameTimer))
+            {
+                case 20:
+                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[1];
+                    PropSpawnRateArr = GlobalData.PropRateListByLevel[1];
+                    BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[1];
+                    break;
+                case 30:
+                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[2];
+                    PropSpawnRateArr = GlobalData.PropRateListByLevel[2];
+                    BarrierSpawnRateArr = GlobalData.BarrierRateListByLevel[2];
+                    break;
+                case 40:
+                    GoodsSpawnRateArr = GlobalData.GoodsRateListByLevel[3];
+                    isRefreshRate = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    //控制道具的生成
+    private void HandleSpawnProp()
+    {
+        if (Time.time - propTimer >= spawnPropLimitTime)
+        {
+            currentPropCount = 0;
+            propTimer = Time.time;
         }
     }
 
@@ -406,9 +421,51 @@ public class SpawnManager : MonoBehaviour {
         }
     }
 
+    //生成指定行数的游戏物品
+    public void SpawnBatchLine(int _count)
+    {
+        for(int i = 0; i < _count; i++)
+        {
+            if (currentLine >= nextFullBarrierLine)
+            {
+                //如果主角身后没有元件，则不生成整行障碍
+                if (player.GetCellCount() == 0)
+                {
+                    //生成一行物品
+                    SpawnSingleLine();
+                }
+                else
+                {
+                    if (isSpawnBarrier)
+                    {
+                        //生成一行障碍
+                        SpawnBarrierFullline();
+                    }
+                }
+                //更新下一个生成整行障碍的行数
+                nextFullBarrierLine = nextFullBarrierLine + UnityEngine.Random.Range(minFullSpace, maxFullSpace + 1);
+            }
+            else
+            {
+                //生成一行物品
+                SpawnSingleLine();
+            }
+
+            currentLine++;
+            previousPlayerPos = player.mTransform.position;
+        }
+    }
+
     //生成障碍
     public void SpawnSingleBarrier(int _x, int _y, Vector2 _pos, Transform _parent, bool isFullLine)
     {
+        //生成障碍，设置位置
+        Transform _b = Instantiate(barrierPrefab, _parent).transform;
+        _b.localPosition = _pos;
+
+        //初始化障碍图片，分数
+        var _bScript = _b.GetComponentInChildren<Barrier>();
+
         //随机障碍类型
         int type = Utils.GetRandomType(BarrierSpawnRateArr);
         int _point;
@@ -416,6 +473,9 @@ public class SpawnManager : MonoBehaviour {
         {
             //当是生成整排障碍的情况下，障碍的分数需小于主角当前元件个数
             _point = UnityEngine.Random.Range(1, player.GetCellCount() + 1);
+            //并为该障碍添加 分数修正 脚本，检查主角cell值是否小于自身point，如果是则更新自身point
+            var correct = _b.gameObject.AddComponent<CorrectPointByPlayerCell>();
+            correct.Init(_bScript);
         }
         else
         {
@@ -425,13 +485,8 @@ public class SpawnManager : MonoBehaviour {
             _point = UnityEngine.Random.Range(minPoint, maxPoint);
         }
 
-        //生成障碍，设置位置
-        Transform _b = Instantiate(barrierPrefab, _parent).transform;
-        _b.localPosition = _pos;
-
-        //初始化障碍图片，分数
-        var _bScript = _b.GetComponentInChildren<Barrier>();
         _bScript.Init(_x, _y, barrierSpritesArr[type], _point);
+
     }
 
     //生成一整行障碍

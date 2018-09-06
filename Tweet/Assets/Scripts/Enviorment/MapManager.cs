@@ -33,7 +33,7 @@ public class MapManager : MonoBehaviour {
         MapsList = new List<Transform>();
     }
 
-    void Start()
+    public void Init()
     {
         CreateMap();
     }

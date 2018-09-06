@@ -18,13 +18,15 @@ public class CameraMove : MonoBehaviour {
 
     public bool isFollowing { get; set; }                   //检测是否开启跟随
 
-    void Start () {
-		if(target == null)
+    public void Init(Player _player)
+    {
+        if (target == null)
         {
             //FindObjectOfType 效率很低，据说一般用单例模式替代
-            target = FindObjectOfType<Player>();
+            target = _player;
         }
         focusArea = new FocusArea(target.pCollider.bounds, focusAreaSize);
+        isFollowing = true;
     }
 	
 	void LateUpdate () {

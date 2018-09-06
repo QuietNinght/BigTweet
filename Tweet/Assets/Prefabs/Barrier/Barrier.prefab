@@ -36,7 +36,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4546995165663958}
   - component: {fileID: 61103198745951352}
-  - component: {fileID: 114915866782606772}
   - component: {fileID: 114908678096075842}
   m_Layer: 8
   m_Name: Barrier
@@ -54,7 +53,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4895242963315206}
   m_Layer: 8
-  m_Name: NumPoint
+  m_Name: NumPos
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -138,23 +137,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   render: {fileID: 212528176933228230}
-  point: 0
   scoreToAdd: 1
   hitSpaceTime: 0.5
-  numPonint: {fileID: 4895242963315206}
---- !u!114 &114915866782606772
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1964915788763222}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dabb2a38c85890d42ab47650cb3f71d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  type: 1
-  time: 0
+  numPos: {fileID: 4895242963315206}
 --- !u!212 &212528176933228230
 SpriteRenderer:
   m_ObjectHideFlags: 1

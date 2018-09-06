@@ -13,13 +13,12 @@ public class GameManager : MonoBehaviour {
     {
         get { return instance; }
     }
+
     [Header("Proporty")]
-    //public float maxEnergy;
-    //public float Energy { get; set; }
-    //public float sprintDuration;
-    //public float sprintSpeed;
-    //public float energyClearTime;
-    //private bool isEnergyGrouping = true;
+    private GameObject mGameObject;
+    private Tweener currentScoreAni;
+
+    public GameObject MapRoot;
 
     [Header("Player")]
     public Vector3 basePos;
@@ -28,6 +27,8 @@ public class GameManager : MonoBehaviour {
     [Header("Prefab")]
     public GameObject propNumPrefab;
     public GameObject[] playerPrefabArr;
+
+    public GameObject initMapPrefab;
 
     [Header("Effect")]
     public AudioClip gameBg;
@@ -48,46 +49,82 @@ public class GameManager : MonoBehaviour {
 	void Awake()
     {
         instance = this;
+        mGameObject = gameObject;
     }
 
     //得分
     public int Score { get; set; }
 
+    //增加分数
     public void AddScore(int _add)
     {
-        Score += _add;
+        if(_add <= 0)
+        {
+            return;
+        }
+
+        if (_add == 1)
+        {
+            Score += _add;
+        }
+        else
+        {
+            IncrementPoint(Score + _add);
+        }
     }
 
-    //测试时使用，生成器实现后删除该函数
+    //递增改变分数
+    void IncrementPoint(int _targetSocre)
+    {
+        if (currentScoreAni != null)
+        {
+            currentScoreAni.Kill();
+        }
+        currentScoreAni = DOTween.To(() => Score, r => Score = r, _targetSocre, 1f).OnComplete(() =>
+        {
+            Score = _targetSocre;
+        });
+    }
+
+    //整个游戏场景的入口
     void Start()
     {
         GameStart();
-    }
-
-    void Update()
-    {
-
     }
 
     //游戏开始
     public void GameStart()
     {
         gameState = GameState.Game;
+
+        /************************************* 初始化游戏内容 *************************************/
+
         //初始化界面
         MenuManager.Instance.GameStart();
 
-        //初始化游戏内容
-        //生成主角，根据出战角色
-        /*int playerID = PlayerPrefs.GetInt(GlobalData.FightPlayer, 0);
-        Transform p = Instantiate(playerPrefabArr[playerID], basePos, Quaternion.identity).transform;
-        p.SetParent(playerBody);
-        player = p.GetComponent<Player>();*/
+        //生成初始地图，并初始化
+        InitSpawn initMap = Instantiate(initMapPrefab, MapRoot.transform).GetComponent<InitSpawn>();
+        initMap.Init();
 
-        //开启相机跟随
-        mCamera.GetComponent<CameraMove>().isFollowing = true;
+        //生成主角，根据出战角色
+        int playerID = PlayerPrefs.GetInt(GlobalData.FightPlayer, 0);
+        Transform p = Instantiate(playerPrefabArr[playerID], playerBody).transform;
+        p.localPosition = basePos;
+
+        player = p.GetComponent<Player>();
+        player.Init();
+
+        //初始化地图管理器
+        MapManager.Instance.Init();
+
+        //初始化物品生成器
+        SpawnManager.Instance.Init(player);
+
+        //初始化相机跟随功能
+        mCamera.GetComponent<CameraMove>().Init(player);
         player.isPlaying = true;
 
-        //初始化游戏内容完毕
+        /************************************* 初始化游戏内容完毕 *************************************/
 
         //播发音乐
         //SoundManager.PlayMusic(gameBg);

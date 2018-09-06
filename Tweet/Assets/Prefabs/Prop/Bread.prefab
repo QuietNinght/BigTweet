@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4934949517265588}
   - component: {fileID: 61855086655264342}
-  - component: {fileID: 114964063494853956}
   - component: {fileID: 114197344871174812}
   - component: {fileID: 114636124057578476}
   m_Layer: 0
@@ -125,19 +124,6 @@ MonoBehaviour:
   destroyEffect: {fileID: 0}
   player: {fileID: 0}
   duration: 10
---- !u!114 &114964063494853956
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1535312649471602}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dabb2a38c85890d42ab47650cb3f71d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  type: 1
-  time: 0
 --- !u!212 &212671358239844826
 SpriteRenderer:
   m_ObjectHideFlags: 1

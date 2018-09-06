@@ -12,13 +12,13 @@ public class Barrier : MonoBehaviour {
     private PropNum propNum;
     [HideInInspector]
     //障碍可被撞击次数
-    public int point;
+    public int Point{ get;set; }
     //每次撞击为主角添加的分数
     public int scoreToAdd;
     //被主角撞击的间隔时间
     public float hitSpaceTime;
     //数字文本生成位置
-    public Transform numPonint;
+    public Transform numPos;
 
     public int X { get; set; }
     public int Y { get; set; }
@@ -29,9 +29,9 @@ public class Barrier : MonoBehaviour {
         X = _x;
         Y = _y;
         render.sprite = _sprite;
-        point = _point;
+        Point = _point;
         //生成数字显示文本
-        propNum = GameManager.Instance.CreatePropNum(numPonint, Vector3.zero, point);
+        propNum = GameManager.Instance.CreatePropNum(numPos, Vector3.zero, Point);
         GetComponentInChildren<SpriteRenderer>().sortingOrder = -_y;
     }
 
@@ -122,15 +122,21 @@ public class Barrier : MonoBehaviour {
         Destroy(gameObject);
     }
 
+    public void CorrectPoint(int _point)
+    {
+        Point = _point;
+        propNum.RefreshNum(Point);
+    }
+
     //受到伤害
     public void OnDamage(int damage, GameObject instigator)
     {
         //增加得分
         GameManager.Instance.AddScore(scoreToAdd);
         //减少可被撞击次数
-        point -= damage;
+        Point -= damage;
         //如果point<=0，则销毁障碍
-        if (point <= 0)
+        if (Point <= 0)
         {
             OnDestory();
             return;
@@ -138,7 +144,7 @@ public class Barrier : MonoBehaviour {
         else
         {
             //刷新数字文本
-            propNum.RefreshNum(point);
+            propNum.RefreshNum(Point);
             //生成特效
 
         }
@@ -148,7 +154,7 @@ public class Barrier : MonoBehaviour {
     public void OnExplode()
     {
         //增加得分
-        GameManager.Instance.AddScore(point * scoreToAdd);
+        GameManager.Instance.AddScore(Point * scoreToAdd);
 
         OnDestory();
     }

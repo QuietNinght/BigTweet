@@ -46,19 +46,19 @@ public class HomeMenuManager : MonoBehaviour {
 
     public void OpenSetUI()
     {
-        HomeMenu_Start.SetActive(false);
+        //HomeMenu_Start.SetActive(false);
         HomeMenu_Set.SetActive(true);
     }
 
     public void OpenRankUI()
     {
-        HomeMenu_Start.SetActive(false);
+        //HomeMenu_Start.SetActive(false);
         HomeMenu_Rank.SetActive(true);
     }
 
     public void OpenStoreUI()
     {
-        HomeMenu_Start.SetActive(false);
+        //HomeMenu_Start.SetActive(false);
         HomeMenu_Store.SetActive(true);
     }
 

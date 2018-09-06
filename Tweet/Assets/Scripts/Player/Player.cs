@@ -96,6 +96,12 @@ public class Player : MonoBehaviour
 
     protected virtual void Start()
     {
+
+    }
+
+    //初始化主角
+    public virtual void Init()
+    {
         Energy = 0;
 
         //记录初始速度
@@ -196,7 +202,7 @@ public class Player : MonoBehaviour
                 OpenSprint(sprintDuration, sprintSpeed);
                 isEnergyGrouping = false;
                 //能量条归零的动画，动画完成后再次开启能量的增长
-                DOTween.To(() => Energy, r => Energy = r, 0, sprintDuration * (1+sprintDuartionRate)).OnComplete(() =>
+                DOTween.To(() => Energy, r => Energy = r, 0, sprintDuration * (1 + sprintDuartionRate)).OnComplete(() =>
                 {
                     Debug.Log("能量条清零完成");
                     isEnergyGrouping = true;
@@ -492,7 +498,7 @@ public class Player : MonoBehaviour
 
             yield return new WaitForSeconds(attackSpaceTime);
 
-            if (barrier.point > 0)
+            if (barrier.Point > 0)
             {
                 StartCoroutine(AttackCor(barrier));
             }
