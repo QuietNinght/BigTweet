@@ -12,8 +12,8 @@ public class Player : MonoBehaviour
     [Header("Cell")]
     public GameObject cellPre;                  //元件的prefab
     public List<Cell> cellList;                 //主角身后的元件列表
-    public float basePos;                       //第一个元件的位置
-    public float cellSpaceOffest;               //每个元件之间的位置距离
+    public Vector2 cellBasePos;                 //第一个元件的位置
+    public Vector2 cellSpaceOffest;               //每个元件之间的位置距离
     public int initialCellCount;                //初始的时候身后的元件个数
     protected int currentCellCount;             //当前元件个数
 
@@ -109,8 +109,6 @@ public class Player : MonoBehaviour
 
         //生成一个PropNum，显示主角的元件数量
         cellNum = GameManager.Instance.CreatePropNum(propNumPoint, Vector3.zero, initialCellCount);
-        cellNum.SetColor(Color.yellow);
-        cellNum.SetSize(50);
 
         //初始化主角身后的元件
         if (initialCellCount > 0)
@@ -232,7 +230,6 @@ public class Player : MonoBehaviour
     public void ResetSpeed()
     {
         moveYSpeed = initialMoveYSpeed;
-        isSprint = false;
     }
 
     //开启磁铁功能
@@ -265,8 +262,18 @@ public class Player : MonoBehaviour
     public void OpenSprint(float _duration, float _speed)
     {
         var _t = _duration * (1 + sprintDuartionRate);
-        Sprint.GetComponent<Sprint>().Open(_t, _speed);
+        Sprint.GetComponent<Sprint>().Open(_t);
+        SetSpeed(_speed);
+        OpenGodMode();
         isSprint = true;
+    }
+    //关闭冲刺
+    public void CloseSprint()
+    {
+        ResetSpeed();
+        CloseGodMode();
+        ResetCollision();
+        isSprint = false;
     }
 
     //开启技能攻击
@@ -296,8 +303,8 @@ public class Player : MonoBehaviour
     //开始碰撞
     public bool OpenCollision()
     {
-        //当还有碰撞次数，且不在冲刺状态，才能进行碰撞
-        if (currentHitCount > 0 && isSprint == false)
+        //当还有碰撞次数，才能进行碰撞
+        if (currentHitCount > 0)
         {
             currentHitCount--;
             //Debug.Log("当前剩余可碰撞个数：" + currentHitCount);
@@ -320,6 +327,7 @@ public class Player : MonoBehaviour
     public void ResetCollision()
     {
         currentHitCount = maxHitCount;
+        isHitting = false;
     }
 
     //增加指定个数的元件
@@ -333,23 +341,20 @@ public class Player : MonoBehaviour
             if (cellList.Count > 0)
             {
                 var previous = cellList[cellList.Count - 1].transform.localPosition;
-                var posY = previous.y - cellSpaceOffest;
+                var posY = previous.y + cellSpaceOffest.y;
                 newCell.transform.localPosition = new Vector2(previous.x, posY);
             }
             else
             {
-                var previous = mTransform.localPosition;
-                var posY = mTransform.localPosition.y - basePos;
-                newCell.transform.localPosition = new Vector2(previous.x, posY);
+                var posY = mTransform.localPosition.y + cellBasePos.y;
+                var posX = mTransform.localPosition.x + cellBasePos.x;
+                newCell.transform.localPosition = new Vector2(posX, posY);
             }
-            //var posY = basePos + cellList.Count * cellSpaceOffest;
-
-            //Debug.Log("newCell的位置：" + posY);
 
             //初始化该元件,如果是第一元件，其跟随目标为主角，否则为其前一个元件
             if (cellList.Count == 0)
             {
-                newCell.Init(mTransform, basePos);
+                newCell.Init(mTransform, cellBasePos);
             }
             else if (cellList.Count > 0)
             {
@@ -412,7 +417,7 @@ public class Player : MonoBehaviour
         if (cellList.Count > 0)
         {
             //刷新原先第二个元件的数据
-            cellList[0].Refresh(mTransform, basePos);
+            cellList[0].Refresh(mTransform, cellBasePos);
         }
         return true;
     }
@@ -458,6 +463,11 @@ public class Player : MonoBehaviour
                 }
                 //撞击后减少护盾韧性/关闭护盾
                 CloseShield();
+            }
+            else if (isSprint && isShield == false)
+            {
+                //如果在冲刺状态，直接撞毁敌人
+                barrier.OnExplode();
             }
             else
             {
@@ -539,6 +549,7 @@ public class Player : MonoBehaviour
         var barrier = other.GetComponent<Barrier>();
         if (barrier != null)
         {
+
             Attack(barrier);
         }
     }
@@ -562,10 +573,6 @@ public class Player : MonoBehaviour
         if (barrier != null)
         {
             CloseCollision();
-            //if (attackCor != null)
-            //{
-            //    StopCoroutine(attackCor);
-            //}
             StopAllCoroutines();
         }
     }

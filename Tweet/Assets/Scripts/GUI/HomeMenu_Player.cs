@@ -14,10 +14,13 @@ public class HomeMenu_Player : MonoBehaviour {
     [System.Serializable]
     public struct AttackData                    //攻击类型对应信息结构体
     {
+        public HomeMenu_PlayerInfo.AttackType attackType;
         public Sprite attackIcon;
         public string attackInfo;
     }
-    public AttackData[] PlayerAttackDataList;
+    public AttackData[] AttackDataArr;
+
+    private Dictionary<HomeMenu_PlayerInfo.AttackType, AttackData> AttackTypeDataDic;
 
     private int fightPlayerID;                  //当前出战角色的id
     private int lookedPlayerID;                 //当前查看的角色id
@@ -28,7 +31,7 @@ public class HomeMenu_Player : MonoBehaviour {
     public Text playerIntroduceText;            //主角介绍文本
     public Image playerBackgoundImg;            //主角背景图片
     public Image attackIconImg;                 //主角攻击类型图标
-    public Text attackInfoText;                 //主角攻击类型介绍文本
+    public Text attackIntroText;                //主角攻击类型介绍文本
 
     [Header("UI Setting")]
     public RectTransform PlayerListRoot;        //放置角色 图片/对象 的根物体
@@ -36,7 +39,7 @@ public class HomeMenu_Player : MonoBehaviour {
     public HomeMenu_PlayerInfo[] playerList;    //可选角色列表
 
     //一次移动的变化量
-    private float step = 720f;
+    public float onceStep = 210f;
     private bool sliding = false;
     private float smooth = 10f;
     private float newPosX = 0;
@@ -52,14 +55,40 @@ public class HomeMenu_Player : MonoBehaviour {
     public GameObject SureBuyPanel;             //确认购买的提示弹窗
 
 
-    void Start ()
+    void Awake ()
+    {
+        //测试用，先给自己100金币
+        PlayerPrefs.SetInt(GlobalData.Coin, 100);
+
+        AttackTypeDataDic = new Dictionary<HomeMenu_PlayerInfo.AttackType, AttackData>();
+        for(int i = 0; i < AttackDataArr.Length; i++)
+        {
+            if(AttackTypeDataDic.ContainsKey(AttackDataArr[i].attackType) == false)
+            {
+                AttackTypeDataDic.Add(AttackDataArr[i].attackType, AttackDataArr[i]);
+            }
+        }
+
+        howManyPlayer = playerList.Length;
+    }
+
+    void OnEnable()
     {
         currentCoinNum = PlayerPrefs.GetInt(GlobalData.Coin, 0);
         RefreshCoinShow(currentCoinNum);
 
         //初始化显示出战角色
         fightPlayerID = PlayerPrefs.GetInt(GlobalData.FightPlayer, 0);
-        PlayerListRoot.anchoredPosition = new Vector2((fightPlayerID * -step), PlayerListRoot.anchoredPosition.y);
+        Debug.Log("当前出战角色id:" + fightPlayerID);
+        if (PlayerPrefs.GetInt(GlobalData.PlayerLocked + 0, 0) == 0)
+        {
+            //第一个角色默认为解锁状态
+            PlayerPrefs.SetInt(GlobalData.PlayerLocked + 0, 1);
+        }
+        //移动显示出战角色
+        newPosX = fightPlayerID * -onceStep;
+        //sliding = true;
+        PlayerListRoot.anchoredPosition = new Vector2(fightPlayerID * -onceStep, PlayerListRoot.anchoredPosition.y);
 
         //初始化选中角色信息
         lookedPlayerID = fightPlayerID;
@@ -86,7 +115,9 @@ public class HomeMenu_Player : MonoBehaviour {
     //判断金币是否足够
     bool HaveEnoughMoney()
     {
-        if(PlayerPrefs.GetInt(GlobalData.Coin, 0) >= playerList[lookedPlayerID].price)
+        Debug.Log("当前拥有的金币数：" + currentCoinNum);
+        Debug.Log("角色的售价：" + playerList[lookedPlayerID].price);
+        if(currentCoinNum >= playerList[lookedPlayerID].price)
         {
             return true;
         }
@@ -99,22 +130,26 @@ public class HomeMenu_Player : MonoBehaviour {
     //刷新角色信息显示
     void RefreshPlayerInfoShow()
     {
-        playerNameText.text = playerList[lookedPlayerID].playerName;            //角色名字
-        playerIntroduceText.text = playerList[lookedPlayerID].introduce;        //角色介绍
-        playerBackgoundImg.sprite = playerList[lookedPlayerID].backGround;      //角色背景图片
+        Debug.Log("当前切换到的角色id：" + lookedPlayerID);
 
-        var index = (int)playerList[lookedPlayerID].attackType;                 //角色攻击类型编号
-        attackIconImg.sprite = PlayerAttackDataList[index].attackIcon;          //角色攻击类型图标
-        attackInfoText.text = PlayerAttackDataList[index].attackInfo;           //角色攻击类型信息
+        playerNameText.text = playerList[lookedPlayerID].playerName;           //角色名字
+        playerIntroduceText.text = playerList[lookedPlayerID].introduce;       //角色介绍
+        playerBackgoundImg.sprite = playerList[lookedPlayerID].backGround;     //角色背景图片
 
+        var type = playerList[lookedPlayerID].attackType;                      //角色攻击类型编号
+        attackIconImg.sprite = AttackTypeDataDic[type].attackIcon;             //角色攻击类型图标
+        attackIntroText.text = AttackTypeDataDic[type].attackInfo;             //角色攻击类型信息
+
+        int isLocked = PlayerPrefs.GetInt(GlobalData.PlayerLocked +lookedPlayerID, 0);
+        Debug.Log("角色是否已经解锁：" + isLocked);
         //0表示未解锁，1表示解锁
-        if(PlayerPrefs.GetInt(GlobalData.PlayerLocked + lookedPlayerID, 0) == 0)
+        if (isLocked == 0)
         {
             //显示购买按钮
             RefreshBtnShow(0);
             playerPriceText.text = playerList[lookedPlayerID].price.ToString();
         }
-        else if(PlayerPrefs.GetInt(GlobalData.PlayerLocked + lookedPlayerID, 0) == 1)
+        else if(isLocked == 1)
         {
             if (lookedPlayerID == fightPlayerID)
             {
@@ -129,7 +164,7 @@ public class HomeMenu_Player : MonoBehaviour {
         }
     }
 
-    //刷新按钮显示
+    //刷新按钮显示（0：显示购买按钮； 1：显示出战按钮； 2：显示已出战按钮
     void RefreshBtnShow(int type)
     {
         switch (type)
@@ -165,10 +200,17 @@ public class HomeMenu_Player : MonoBehaviour {
     {
         if (!sliding)
         {
-            newPosX -= step;
-
-            if(newPosX < -step * (howManyPlayer - 1))
+            if(lookedPlayerID == playerList.Length - 1)
             {
+                return;
+            }
+
+            newPosX -= onceStep;
+
+            if(newPosX < -onceStep * (howManyPlayer - 1))
+            {
+                newPosX = -onceStep * (howManyPlayer - 1);
+                sliding = true;
                 return;
             }
             else
@@ -185,11 +227,18 @@ public class HomeMenu_Player : MonoBehaviour {
     {
         if (!sliding)
         {
-            newPosX += step;
+            if(lookedPlayerID == 0)
+            {
+                return;
+            }
+
+            newPosX += onceStep;
 
             //判断要进行的位移是否超出边界
             if(newPosX > 0)
             {
+                newPosX = 0;
+                sliding = true;
                 return;
             }
             else
@@ -207,7 +256,9 @@ public class HomeMenu_Player : MonoBehaviour {
         //更新出战角色id
         fightPlayerID = lookedPlayerID;
         //更新出战角色id存档
-        PlayerPrefs.SetInt(GlobalData.FightPlayer, lookedPlayerID);
+        PlayerPrefs.SetInt(GlobalData.FightPlayer, fightPlayerID);
+        //刷新按钮显示
+        RefreshBtnShow(2);
     }
 
     //点击购买按钮
@@ -228,11 +279,17 @@ public class HomeMenu_Player : MonoBehaviour {
             var newCoin = currentCoinNum - playerList[lookedPlayerID].price;
             RefreshCoinShow(newCoin);
             PlayerPrefs.SetInt(GlobalData.Coin, newCoin);
+            currentCoinNum = newCoin;
             //更新角色 是否解锁 存档数据
             PlayerPrefs.SetInt(GlobalData.PlayerLocked + lookedPlayerID, 1);
+            Debug.Log("解锁的角色id为：" + lookedPlayerID);
+            //关闭确认购买面板
+            SureBuyPanel.SetActive(false);
         }
         else
         {
+            //关闭确认购买面板
+            SureBuyPanel.SetActive(false);
             NotEnoughPanel.SetActive(true);
         }
     }

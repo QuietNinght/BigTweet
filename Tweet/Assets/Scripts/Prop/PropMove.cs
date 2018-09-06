@@ -7,9 +7,15 @@ public class PropMove : MonoBehaviour {
 
     private Player player;
 
+    private SpriteRenderer render;
+    private Vector3 offest;
+
     void Awake()
     {
         enabled = false;
+        render = GetComponentInChildren<SpriteRenderer>();
+
+        offest = new Vector3(0, render.size.y, 0);
     }
 
     void Start()
@@ -19,6 +25,7 @@ public class PropMove : MonoBehaviour {
 
     void Update()
     {
-        transform.position = Vector3.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
+        Vector3 newPos = player.mTransform.position - offest;
+        transform.position = Vector3.MoveTowards(transform.position, newPos, speed * Time.deltaTime);
     }
 }

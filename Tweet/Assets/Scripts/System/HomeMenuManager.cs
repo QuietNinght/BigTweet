@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class HomeMenuManager : MonoBehaviour {
 
@@ -27,12 +28,20 @@ public class HomeMenuManager : MonoBehaviour {
 
     void Start()
     {
+        //测试用，清除所有存档
+        PlayerPrefs.DeleteAll();
+
         HomeMenu_Start.SetActive(true);
         HomeMenu_Set.SetActive(false);
         HomeMenu_Rank.SetActive(false);
         HomeMenu_Store.SetActive(false);
         HomeMenu_Player.SetActive(false);
         HomeMenu_Loading.SetActive(false);
+    }
+
+    public void StartGame()
+    {
+        SceneManager.LoadSceneAsync("Game");
     }
 
     public void OpenSetUI()

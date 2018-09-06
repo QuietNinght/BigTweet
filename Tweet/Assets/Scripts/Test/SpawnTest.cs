@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class SpawnTest : MonoBehaviour {
@@ -113,7 +112,6 @@ public class SpawnTest : MonoBehaviour {
 
             float screenWidthWorldPos = Camera.main.orthographicSize * Screen.width / Screen.height;
             float distBetweenBlocks = screenWidthWorldPos / trackCount;
-            float distBetweenRailes = screenWidthWorldPos / (trackCount + 1);
 
             //在中心生成 一行物品 的父物体
             Transform root = (new GameObject("root" + (i + 1))).transform;
@@ -216,8 +214,8 @@ public class SpawnTest : MonoBehaviour {
         {
             total += chanceArr[i];
         }
-        UnityEngine.Random rd = new UnityEngine.Random();
-        int rad = UnityEngine.Random.Range(0, total);
+
+        int rad = Random.Range(0, total);
         for (int i = 0; i < chanceArr.Length; i++)
         {
             if (rad < chanceArr[i])
@@ -247,14 +245,14 @@ public class SpawnTest : MonoBehaviour {
         if (isFullLine)
         {
             //当是生成整排障碍的情况下，障碍的分数需小于主角当前元件个数
-            _point = UnityEngine.Random.Range(1, player.GetCellCount() + 1);
+            _point = Random.Range(1, player.GetCellCount() + 1);
         }
         else
         {
             //根据类型计算障碍的分数区间
             int minPoint = (type * 10) > 0 ? (type * 10) : (type * 10) + 1;
             int maxPoint = (type * 10) + 9;
-            _point = UnityEngine.Random.Range(minPoint, maxPoint);
+            _point = Random.Range(minPoint, maxPoint);
         }
 
         //生成障碍，设置位置
@@ -275,7 +273,7 @@ public class SpawnTest : MonoBehaviour {
         //根据道路数量来生成每一行的物品个数
         var limit = trackCount / 2;
         //随机一条道路生成生命值必定小于主角当前生命值的障碍
-        int mustLessIndex = UnityEngine.Random.Range(-limit, limit + 1);
+        int mustLessIndex = Random.Range(-limit, limit + 1);
         //从左边开始生成
         for (int m = -limit; m <= limit; m++)
         {
@@ -284,7 +282,7 @@ public class SpawnTest : MonoBehaviour {
                 //如果道路数量为偶数，且m为0，则不在该节点进行生成操作
                 while (mustLessIndex == 0)
                 {
-                    mustLessIndex = UnityEngine.Random.Range(-limit, limit + 1);
+                    mustLessIndex = Random.Range(-limit, limit + 1);
                 }
                 continue;
             }

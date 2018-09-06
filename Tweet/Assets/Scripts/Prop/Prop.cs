@@ -12,7 +12,7 @@ public class Prop : MonoBehaviour {
     //销毁特效
     public GameObject destroyEffect;
     //自身Transform组件
-    public Transform mTransform;
+    protected Transform mTransform;
     //主角
     [HideInInspector]
     public Player player;

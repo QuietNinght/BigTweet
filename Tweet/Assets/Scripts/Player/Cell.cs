@@ -12,7 +12,7 @@ public class Cell : MonoBehaviour {
     //是否移动
     private bool isMove;
     //与前一个元件的距离
-    private float space;
+    private Vector2 offest;
 
     private float velocityXSmoothing;
     //水平加速时间
@@ -21,18 +21,18 @@ public class Cell : MonoBehaviour {
     private MoveController controller;
     private Vector2 velocity;
 
-    public void Init(Transform _previous, float _space)
+    public void Init(Transform _previous, Vector2 _space)
     {
         previous = _previous;
-        space = _space;
+        offest = _space;
         isMove = true;
         controller = GetComponent<MoveController>();
     }
 
-    public void Refresh(Transform _previous, float _space)
+    public void Refresh(Transform _previous, Vector2 _offest)
     {
         previous = _previous;
-        space = _space;
+        offest = _offest;
     }
 
     //目标，限制元件的移动，在遇到border和障碍的时候停止移动
@@ -42,10 +42,10 @@ public class Cell : MonoBehaviour {
         {
             //var endPos = new Vector2(previous.position.x, previous.position.y - space);
 
-            var newPosX = previous.position.x;
+            var newPosX = previous.position.x + offest.x;
             //在没有碰到阻碍的时候，才能进行左右移动
             velocity.x = Mathf.SmoothDamp(transform.position.x, newPosX, ref velocityXSmoothing, accelerationTime);
-            velocity.y = previous.position.y - space;
+            velocity.y = previous.position.y + offest.y;
             //进行跟随移动
             //transform.position = new Vector2(newPosX, newPosY);
         }

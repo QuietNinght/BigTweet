@@ -16,6 +16,7 @@ public class InitSpawn : MonoBehaviour {
     public int spawnLineCount;
     //行与行的间距
     public float lineSpace;
+    public float correctWidth;              //地图边缘留出的宽度
     //起始生成位置
     public float basePos;
 
@@ -54,6 +55,7 @@ public class InitSpawn : MonoBehaviour {
 
     public void Init()
     {
+        int proCount = Random.Range(1, maxPropCount + 1);
 
         //生成游戏物品
         for (int i = 0; i < spawnLineCount; i++)
@@ -62,14 +64,13 @@ public class InitSpawn : MonoBehaviour {
             //不生成，生成障碍，生成道具的概率：50%，0%，50%
             GoodsSpawnChance = new int[] { 50, 0, 50 };
 
-            float screenWidthWorldPos = Camera.main.orthographicSize * Screen.width / Screen.height;
+            float screenWidthWorldPos = Camera.main.orthographicSize * (Screen.width - correctWidth) / Screen.height;
             float distBetweenBlocks = screenWidthWorldPos / trackCount;
-            float distBetweenRailes = screenWidthWorldPos / (trackCount + 1);
 
             //在中心生成 一行物品 的父物体
             Transform root = (new GameObject("root" + (i + 1))).transform;
             root.SetParent(mTransform);
-            root.localPosition = new Vector2(0, i * lineSpace + basePos);
+            root.localPosition = new Vector2(0, (i * lineSpace) + (basePos * lineSpace));
 
             //如果是倒数第二行，直接生成一整行
             if (i == spawnLineCount - 2)
@@ -120,7 +121,7 @@ public class InitSpawn : MonoBehaviour {
                     }
                     else
                     {
-                        if (currentPropCount < maxPropCount)
+                        if (currentPropCount < proCount)
                         {
                             //其它表示道具
                             SpawnProp(pos, root);

@@ -20,6 +20,7 @@ public class SpawnManager : MonoBehaviour {
 
     public int trackCount;                  //地图上的道路数量
     public float lineSpace;                 //行与行的间距
+    public float correctWidth;              //地图边缘留出的宽度
     private int currentLine;                //当前物品行数
     private float gameTimer;                //记录游戏持续时间
     private bool isRefreshRate = true;      //标记是否更新概率数组
@@ -238,7 +239,7 @@ public class SpawnManager : MonoBehaviour {
         //开始生成时，获取物品生成概率数组(每一行的各物品生成概率相同)
         int[] goodsSpawnRateArr = (int[])GoodsSpawnRateArr.Clone();
 
-        float screenWidthWorldPos = Camera.main.orthographicSize * Screen.width / Screen.height;
+        float screenWidthWorldPos = Camera.main.orthographicSize * (Screen.width - correctWidth) / Screen.height;
         float distBetweenBlocks = screenWidthWorldPos / trackCount;
 
         //在中心生成 一行物品 的父物体
@@ -437,7 +438,7 @@ public class SpawnManager : MonoBehaviour {
     public void SpawnBarrierFullline()
     {
         Debug.Log("-------------------- 生成一整行障碍 --------------------");
-        float screenWidthWorldPos = Camera.main.orthographicSize * Screen.width / Screen.height;
+        float screenWidthWorldPos = Camera.main.orthographicSize * (Screen.width - correctWidth) / Screen.height;
         float distBetweenBlocks = screenWidthWorldPos / trackCount;
 
         //在中心生成 一行物品 的父物体

@@ -18,11 +18,13 @@ public class HomeMenu_Start : MonoBehaviour {
 	void Start ()
     {
         highScoreText.text = PlayerPrefs.GetInt(GlobalData.HighestScore, 0).ToString();
-
+    }
+	
+    void OnEnable()
+    {
         var playerNum = PlayerPrefs.GetInt(GlobalData.FightPlayer, 0);
         fightPlayerImg.sprite = playerSpriteArr[playerNum];
         fightPlayerImg.SetNativeSize();
         playerSlogan.text = GlobalData.PlayerSlogan[playerNum];
-	}
-	
+    }
 }

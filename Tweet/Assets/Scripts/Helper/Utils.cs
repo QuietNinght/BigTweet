@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Utils {
 
@@ -13,8 +11,8 @@ public class Utils {
         {
             total += RateArr[i];
         }
-        UnityEngine.Random rd = new UnityEngine.Random();
-        int rad = UnityEngine.Random.Range(0, total);
+
+        int rad = Random.Range(0, total);
         for (int i = 0; i < RateArr.Length; i++)
         {
             if (rad < RateArr[i])

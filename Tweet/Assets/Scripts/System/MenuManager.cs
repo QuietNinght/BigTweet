@@ -84,7 +84,7 @@ public class MenuManager : MonoBehaviour {
     public void OnClickHome()
     {
         Time.timeScale = 1;
-        SoundManager.PlaySound(SoundManager.Instance.soundClick);
+        //SoundManager.PlaySound(SoundManager.Instance.soundClick);
         //LoadingScreen.Show();
         SceneManager.LoadSceneAsync("Home");
         

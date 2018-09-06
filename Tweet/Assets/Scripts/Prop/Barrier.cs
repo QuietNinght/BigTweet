@@ -17,6 +17,8 @@ public class Barrier : MonoBehaviour {
     public int scoreToAdd;
     //被主角撞击的间隔时间
     public float hitSpaceTime;
+    //数字文本生成位置
+    public Transform numPonint;
 
     public int X { get; set; }
     public int Y { get; set; }
@@ -29,7 +31,8 @@ public class Barrier : MonoBehaviour {
         render.sprite = _sprite;
         point = _point;
         //生成数字显示文本
-        propNum = GameManager.Instance.CreatePropNum(transform, Vector3.zero, point);
+        propNum = GameManager.Instance.CreatePropNum(numPonint, Vector3.zero, point);
+        GetComponentInChildren<SpriteRenderer>().sortingOrder = -_y;
     }
 
     /**最开始的主角障碍撞击检测及功能执行，暂时注释

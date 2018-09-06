@@ -16,8 +16,10 @@ public class HomeMenu_PlayerInfo : MonoBehaviour
 
     public enum AttackType
     {
+        None,
         Melee,
-        Range
+        Range,
+        All
     }
     public AttackType attackType;
 }

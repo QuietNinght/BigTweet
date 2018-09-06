@@ -7,15 +7,12 @@ using UnityEngine;
  ******************************************************/
 public class Magnet : MonoBehaviour {
 
-    Player player;
-
     CircleCollider2D magnetCollider;
 
     float duration;
 
     void Awake()
     {
-        player = GetComponentInParent<Player>();
         magnetCollider = GetComponent<CircleCollider2D>();
         magnetCollider.enabled = false;
     }
