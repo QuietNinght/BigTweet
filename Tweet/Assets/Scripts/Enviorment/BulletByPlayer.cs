@@ -14,13 +14,6 @@ public class BulletByPlayer : Bullet {
     public AudioClip hitSound;          //击中音效
     public GameObject destroyEffect;    //销毁特效
 
-    Animator anim;
-
-    void Awake()
-    {
-        anim = GetComponent<Animator>();
-    }
-
     void Update()
     {
         if ((liveTime -= Time.deltaTime) <= 0)
@@ -78,6 +71,7 @@ public class BulletByPlayer : Bullet {
     protected override void OnCollideOther(Collider2D other)
     {
         //SoundManager.PlaySound(hitSound);
+        isPlay = false;
         DestroyBullet();
     }
 
@@ -86,7 +80,9 @@ public class BulletByPlayer : Bullet {
         var barrier = other.GetComponent<Barrier>();
         if(barrier != null)
         {
-            barrier.OnDamage(damage, gameObject);
+            isPlay = false;
+            //barrier.OnDamage(damage, gameObject);
+            Owner.GetComponent<Player>().OnRangeHitBarrier(barrier, damage, gameObject);
 
             //关闭子弹的物理效果
             GetComponent<BoxCollider2D>().enabled = false;

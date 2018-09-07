@@ -21,6 +21,10 @@ public class MenuManager : MonoBehaviour {
     public GameObject Menu_Finish;
     public GameObject Menu_Loading;
 
+    [HideInInspector]
+    //主角
+    public Player player;
+
 	void Awake()
     {
         instance = this;
@@ -30,6 +34,12 @@ public class MenuManager : MonoBehaviour {
         Menu_Pause.SetActive(false);
         Menu_Finish.SetActive(false);
         Menu_Loading.SetActive(false);
+    }
+
+    public void Init(Player _player)
+    {
+        player = _player;
+        GameStart();
     }
 
     public void GameStart()

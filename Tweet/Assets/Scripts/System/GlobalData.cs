@@ -32,6 +32,8 @@ public class GlobalData {
         "啾啾啾啾啾",
         "啾啾啾啾啾啾"
     };
+    //角色等级
+    public static string PlayerLevel = "PlayerLevel";
 
     //物品生成概率数组 列表，随时间增长，难度级别升高，概率发生变化
     public static List<int[]> GoodsRateListByLevel = new List<int[]>()

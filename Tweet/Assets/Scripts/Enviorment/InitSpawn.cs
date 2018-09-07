@@ -30,8 +30,6 @@ public class InitSpawn : MonoBehaviour {
     [Header("Barrier")]
     public GameObject barrierPrefab;
     public Sprite barrierSprite;
-    //记录上一个生成了障碍的行序，初始值给0
-    private int preSpawnBarrierLine = 0;
 
     //游戏物品类型
     public enum GoodsType
@@ -109,10 +107,7 @@ public class InitSpawn : MonoBehaviour {
                     }
                     else if (type == 1)
                     {
-                        //SpawnBarrier(pos, root, false);
-                        //preSpawnBarrierLine = i;
-                        //同一行，生成一次障碍后，障碍生成概率减半
-                        //Utils.RefreshRateArr(ref GoodsSpawnChance, 1, GoodsSpawnChance[1] / 2);
+                        
                     }
                     else
                     {

@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour {
     }
 
     [Header("Proporty")]
-    private GameObject mGameObject;
+    //private GameObject mGameObject;
     private Tweener currentScoreAni;
 
     public GameObject MapRoot;
@@ -30,10 +30,13 @@ public class GameManager : MonoBehaviour {
 
     public GameObject initMapPrefab;
 
+    public GameObject bodersPrefab;
+
     [Header("Effect")]
     public AudioClip gameBg;
 
     [Header("Content")]
+    [HideInInspector]
     public Player player;
     public GameObject mCamera;
 
@@ -49,7 +52,7 @@ public class GameManager : MonoBehaviour {
 	void Awake()
     {
         instance = this;
-        mGameObject = gameObject;
+        //mGameObject = gameObject;
     }
 
     //得分
@@ -99,9 +102,6 @@ public class GameManager : MonoBehaviour {
 
         /************************************* 初始化游戏内容 *************************************/
 
-        //初始化界面
-        MenuManager.Instance.GameStart();
-
         //生成初始地图，并初始化
         InitSpawn initMap = Instantiate(initMapPrefab, MapRoot.transform).GetComponent<InitSpawn>();
         initMap.Init();
@@ -114,6 +114,9 @@ public class GameManager : MonoBehaviour {
         player = p.GetComponent<Player>();
         player.Init();
 
+        //初始化界面
+        MenuManager.Instance.Init(player);
+
         //初始化地图管理器
         MapManager.Instance.Init();
 
@@ -123,6 +126,9 @@ public class GameManager : MonoBehaviour {
         //初始化相机跟随功能
         mCamera.GetComponent<CameraMove>().Init(player);
         player.isPlaying = true;
+
+        //生成游戏边界
+        Instantiate(bodersPrefab, Vector3.zero, Quaternion.identity);
 
         /************************************* 初始化游戏内容完毕 *************************************/
 

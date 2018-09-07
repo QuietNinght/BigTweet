@@ -58,7 +58,7 @@ public class HomeMenu_Player : MonoBehaviour {
     void Awake ()
     {
         //测试用，先给自己100金币
-        PlayerPrefs.SetInt(GlobalData.Coin, 100);
+        PlayerPrefs.SetInt(GlobalData.Coin, 400);
 
         AttackTypeDataDic = new Dictionary<HomeMenu_PlayerInfo.AttackType, AttackData>();
         for(int i = 0; i < AttackDataArr.Length; i++)

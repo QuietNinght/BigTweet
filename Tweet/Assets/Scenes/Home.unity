@@ -1997,6 +1997,7 @@ GameObject:
   - component: {fileID: 545825632}
   - component: {fileID: 545825631}
   - component: {fileID: 545825630}
+  - component: {fileID: 545825633}
   m_Layer: 5
   m_Name: BtnCurPlayer
   m_TagString: Untagged
@@ -2109,6 +2110,26 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 545825628}
+--- !u!114 &545825633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 545825628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9abf6cd144d177f4a8589eb96bd7421e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerSpriteArr:
+  - {fileID: 21300000, guid: 6951f83db7b5d3a449962b0b9c909ec7, type: 3}
+  - {fileID: 21300000, guid: 07b678bc4e1c5284e9cfaccc4fad14c7, type: 3}
+  - {fileID: 21300000, guid: 59f2380005337834aaef7ad910ec229e, type: 3}
+  playerClickSpriteArr:
+  - {fileID: 21300000, guid: 0d6b9c8d6e24eb04db4c34c8db95153e, type: 3}
+  - {fileID: 21300000, guid: cb6cf93f62e8b4b4f9240e7e08ad7bba, type: 3}
+  - {fileID: 21300000, guid: 8567c0c6b67bcf146b751aac9d4d811a, type: 3}
+  playerSprite: {fileID: 190312880}
 --- !u!1 &567245611
 GameObject:
   m_ObjectHideFlags: 0
@@ -2493,6 +2514,7 @@ GameObject:
   - component: {fileID: 633972995}
   - component: {fileID: 633972994}
   - component: {fileID: 633972993}
+  - component: {fileID: 633972997}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2534,7 +2556,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 3.75
+  orthographic size: 6.675
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2562,6 +2584,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &633972997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 633972992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d8869261cd253f42ae6bcfae08cf1bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  devWidth: 7.5
+  devHeight: 13.35
+  controlCamera: {fileID: 633972995}
 --- !u!1 &650682110
 GameObject:
   m_ObjectHideFlags: 0
@@ -3594,7 +3630,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1006375942
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3632,8 +3668,8 @@ MonoBehaviour:
   playerSlogan: {fileID: 2076722412}
   playerSpriteArr:
   - {fileID: 21300000, guid: 6951f83db7b5d3a449962b0b9c909ec7, type: 3}
-  - {fileID: 21300000, guid: 59f2380005337834aaef7ad910ec229e, type: 3}
   - {fileID: 21300000, guid: 07b678bc4e1c5284e9cfaccc4fad14c7, type: 3}
+  - {fileID: 21300000, guid: 59f2380005337834aaef7ad910ec229e, type: 3}
 --- !u!1 &1008214627
 GameObject:
   m_ObjectHideFlags: 0
@@ -3985,7 +4021,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 750, y: 1334}
+  m_ReferenceResolution: {x: 750, y: 1335}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -4000,7 +4036,7 @@ Canvas:
   m_GameObject: {fileID: 1093774711}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 633972995}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -4019,8 +4055,8 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1093774711}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 375, y: 667.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 90}
+  m_LocalScale: {x: 0.010000001, y: 0.010000001, z: 0.010000001}
   m_Children:
   - {fileID: 1006375942}
   - {fileID: 871860023}
@@ -4294,7 +4330,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 44.2, y: 129.5}
+  m_AnchoredPosition: {x: 44.199997, y: 129.5}
   m_SizeDelta: {x: 234, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1311766295

@@ -131,6 +131,10 @@ public class Barrier : MonoBehaviour {
     //受到伤害
     public void OnDamage(int damage, GameObject instigator)
     {
+        if(Point == 0)
+        {
+            return;
+        }
         //增加得分
         GameManager.Instance.AddScore(scoreToAdd);
         //减少可被撞击次数
@@ -139,7 +143,6 @@ public class Barrier : MonoBehaviour {
         if (Point <= 0)
         {
             OnDestory();
-            return;
         }
         else
         {

@@ -261,7 +261,7 @@ public class SpawnTest : MonoBehaviour {
 
         //初始化障碍图片，分数
         var _bScript = _b.GetComponentInChildren<Barrier>();
-        //_bScript.Init(barrierSpritesArr[type], _point);
+        _bScript.Init( 0, 0,barrierSpritesArr[type], _point);
 
         BarriersList.Add(_bScript);
     }

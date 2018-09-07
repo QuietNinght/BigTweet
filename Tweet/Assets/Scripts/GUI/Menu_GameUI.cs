@@ -8,12 +8,14 @@ public class Menu_GameUI : MonoBehaviour {
 
     public Text scoreText;                  //分数文本
     public Transform energyGroundSprite;    //能量条显示能量的图片
+    private float energyGroundSpriteMaxX;
 
     private Player player;
 
     void Start()
     {
-        player = FindObjectOfType<Player>();
+        player = MenuManager.Instance.player;
+        energyGroundSpriteMaxX = energyGroundSprite.GetComponent<RectTransform>().rect.width;
     }
 
 	void Update () {
@@ -22,7 +24,9 @@ public class Menu_GameUI : MonoBehaviour {
         scoreText.text = GameManager.Instance.Score.ToString();
         //刷新能量条
         float energyPercent = player.Energy / player.maxEnergy;
-        energyGroundSprite.localScale = new Vector3(energyPercent, 1, 1);
-
+        //energyGroundSprite.localScale = new Vector3(energyPercent, 1, 1);
+        float newPosX = energyGroundSpriteMaxX * energyPercent;
+        newPosX = Mathf.Clamp(newPosX, 0, energyGroundSpriteMaxX);
+        energyGroundSprite.localPosition = new Vector2(newPosX, energyGroundSprite.localPosition.y);
     }
 }

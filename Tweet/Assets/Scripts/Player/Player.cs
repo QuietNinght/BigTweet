@@ -10,23 +10,26 @@ public class Player : MonoBehaviour
 {
 
     [Header("Cell")]
-    public GameObject cellPre;                  //元件的prefab
-    public List<Cell> cellList;                 //主角身后的元件列表
-    public Vector2 cellBasePos;                 //第一个元件的位置
-    public Vector2 cellSpaceOffest;               //每个元件之间的位置距离
-    public int initialCellCount;                //初始的时候身后的元件个数
-    protected int currentCellCount;             //当前元件个数
+    public GameObject cellPre;                              //元件的prefab
+    public List<Cell> cellList;                             //主角身后的元件列表
+    public Vector2 cellBasePos = new Vector2(-0.2f, -1.6f); //第一个元件的位置
+    public Vector2 cellSpaceOffest = new Vector2(0, -1);    //每个元件之间的位置距离
+    public int initialCellCount = 3;                        //初始的时候身后的元件个数
+    protected int currentCellCount;                         //当前元件个数
 
     [Header("Property")]
-    public bool GodMode;                        //是否处于无敌状态
-    public float maxEnergy;
+    public bool GodMode = false;                            //是否处于无敌状态
+    public float maxEnergy = 20f;
     public float Energy { get; set; }
-    public float sprintDuration;
-    public float sprintSpeed;
+    public float sprintDuration = 5f;
+    public float sprintSpeed = 4f;
     private bool isEnergyGrouping = true;
 
-    public Transform propNumPoint;              //数字文本的对焦中心
-    public Transform firePoint;                 //远程攻击开火点
+    public int ID;                              //角色id
+    public int Level{ get; set; }               //角色等级
+
+    protected Transform propNumPoint;           //数字文本的对焦中心
+    protected Transform firePoint;              //远程攻击开火点
 
     protected float magentDuartionRate = 0;     //影响磁铁持续时间的比率值
     protected float shieldDuartionRate = 0;     //影响护盾持续时间的比率值
@@ -34,9 +37,9 @@ public class Player : MonoBehaviour
     protected float skillDurationRate = 0;      //影响技能开启时间的比率值
 
     [Header("Attack")]
-    public int damage;                          //攻击力
-    public float attackSpaceTime;               //攻击间隔时间
-    public int maxHitCount;                     //可同时碰撞障碍的最大个数
+    public int damage = 1;                      //攻击力
+    public float attackSpaceTime = 0.3f;        //攻击间隔时间
+    public int maxHitCount = 1;                 //可同时碰撞障碍的最大个数
     protected int currentHitCount;
 
     public enum SkillType                       //主角的攻击技能种类
@@ -48,13 +51,14 @@ public class Player : MonoBehaviour
     }
     public SkillType skillType;
 
+    public GameObject meleeAttackEffect;        //近战攻击特效
     public GameObject bulletPrefab;             //子弹prefab
-    public float rangeSkillCoolTime;            //远程攻击的冷却时间
-    private float timer;
+    public float rangeSkillCoolTime = 0.5f;     //远程攻击的冷却时间
+    protected float timer;                      //计时器
 
     [Header("Move")]
-    public float moveXSpeed;                    //主角左右移动的速度
-    public float moveYSpeed;                    //主角前后移动的速度
+    public float moveXSpeed = 8f;               //主角左右移动的速度
+    public float moveYSpeed = 2f;               //主角前后移动的速度
     public float accelerationTime = 0.1f;       //水平加速时间
 
     protected float boderOffest;                //左右移动的范围
@@ -68,16 +72,19 @@ public class Player : MonoBehaviour
 
     #region Component
     [Header("Component")]
-    public GameObject Magnet;                   //磁铁组件
-    public GameObject Shield;                   //护盾组件
-    public GameObject Sprint;                   //冲刺组件
-    public GameObject Skill;                    //技能组件
+    protected GameObject Magnet;                   //磁铁组件
+    protected GameObject Shield;                   //护盾组件
+    protected GameObject Sprint;                   //冲刺组件
+    protected GameObject Skill;                    //技能组件
+
+    public BoxCollider2D pCollider;             //用于进行移动检测的碰撞体
+    public BoxCollider2D aCollider;             //用于进行攻击检测的碰撞体
     [HideInInspector]
     public Transform mTransform;
-    public BoxCollider2D pCollider;             //主角用于移动判断碰撞体积
-    public BoxCollider2D aCollider;             //主角用于攻击判断的碰撞体积
     [HideInInspector]
     public MoveController controller;           //移动控制器
+    [HideInInspector]
+    public Animator anim;
 
     protected PropNum cellNum;                  //数字文本
     #endregion
@@ -90,19 +97,37 @@ public class Player : MonoBehaviour
 
     protected void Awake()
     {
+        anim = GetComponent<Animator>();
         controller = GetComponent<MoveController>();
         mTransform = transform;
-    }
-
-    protected virtual void Start()
-    {
-
     }
 
     //初始化主角
     public virtual void Init()
     {
+        /**************************** 初始化组件开始 ****************************/
+        Magnet = mTransform.Find("Magent").gameObject;
+        Shield = mTransform.Find("Shield").gameObject;
+        Sprint = mTransform.Find("Sprint").gameObject;
+        Skill = mTransform.Find("Skill").gameObject;
+        propNumPoint = mTransform.Find("NumPoint");
+        firePoint = mTransform.Find("FirePoint");
+
+        Magnet.SetActive(false);
+        Shield.SetActive(false);
+        Sprint.SetActive(false);
+
+        //生成一个PropNum，显示主角的元件数量
+        cellNum = GameManager.Instance.CreatePropNum(propNumPoint, Vector3.zero, initialCellCount);
+        /**************************** 初始化组件完毕 ****************************/
+
+        /**************************** 初始化属性开始 ****************************/
         Energy = 0;
+
+        //通过id获取当前角色的等级
+        Level = PlayerPrefs.GetInt(GlobalData.PlayerLevel + ID, 0);
+
+        timer = rangeSkillCoolTime;
 
         //记录初始速度
         initialMoveYSpeed = moveYSpeed;
@@ -113,9 +138,6 @@ public class Player : MonoBehaviour
         //初始化可同时碰撞个数
         currentHitCount = maxHitCount;
 
-        //生成一个PropNum，显示主角的元件数量
-        cellNum = GameManager.Instance.CreatePropNum(propNumPoint, Vector3.zero, initialCellCount);
-
         //初始化主角身后的元件
         if (initialCellCount > 0)
         {
@@ -125,6 +147,7 @@ public class Player : MonoBehaviour
 
         //激活被动技能
         PassiveSkill();
+        /**************************** 初始化属性完毕 ****************************/
     }
 
     //在Update函数中进行速度的更新
@@ -239,14 +262,14 @@ public class Player : MonoBehaviour
     }
 
     //开启磁铁功能
-    public void OpenMagnet(float _duration)
+    public virtual void OpenMagnet(float _duration)
     {
         var _t = _duration * (1 + magentDuartionRate);
         Magnet.GetComponent<Magnet>().Open(_t);
     }
 
     //开启护盾
-    public void OpenShield(float _duration)
+    public virtual void OpenShield(float _duration)
     {
         var _t = _duration * (1 + shieldDuartionRate);
         Shield.GetComponent<Shield>().Open(_t);
@@ -265,7 +288,7 @@ public class Player : MonoBehaviour
     }
 
     //开启冲刺
-    public void OpenSprint(float _duration, float _speed)
+    public virtual void OpenSprint(float _duration, float _speed)
     {
         var _t = _duration * (1 + sprintDuartionRate);
         Sprint.GetComponent<Sprint>().Open(_t);
@@ -283,7 +306,7 @@ public class Player : MonoBehaviour
     }
 
     //开启技能攻击
-    public void OpenSkill(float _duration)
+    public virtual void OpenSkill(float _duration)
     {
         Debug.Log("----------------------- 攻击技能启用 ------------------------");
         Skill.GetComponent<Skill>().Open(_duration);
@@ -296,7 +319,7 @@ public class Player : MonoBehaviour
     }
 
     //进入无敌状态
-    public void OpenGodMode()
+    public virtual void OpenGodMode()
     {
         GodMode = true;
     }
@@ -417,7 +440,7 @@ public class Player : MonoBehaviour
         */
         //删除第一个元件
         var delCell = cellList[0];
-        Destroy(delCell.gameObject);
+        delCell.DestroyCell();
         //从列表中移除第一个元件
         cellList.RemoveAt(0);
         if (cellList.Count > 0)
@@ -434,8 +457,14 @@ public class Player : MonoBehaviour
         isPlaying = false;
         //关闭物理效果
         controller.HandlePhysic = false;
+        //关闭动画
+        anim.enabled = false;
         //关闭主角的碰撞体积
-        mTransform.GetComponent<BoxCollider2D>().enabled = false;
+        var colliders = GetComponents<BoxCollider2D>();
+        foreach(var collider in colliders)
+        {
+            collider.enabled = false;
+        }
         //关闭主角的所有协程
         StopAllCoroutines();
         Debug.Log("------------- 游戏结束 -------------");
@@ -450,35 +479,32 @@ public class Player : MonoBehaviour
     }
 
     //主角攻击函数
-    protected void Attack(Barrier barrier)
+    protected virtual void Attack(Barrier barrier)
     {
-        if (OpenCollision())
+        if (isShield)
         {
-            if (isShield)
+            //如果加持了护盾，将一排敌人全部销毁
+            Transform line = barrier.transform.parent;
+            Barrier[] lineBarriers = line.GetComponentsInChildren<Barrier>();
+            foreach (Barrier similar in lineBarriers)
             {
-                //如果加持了护盾，将一排敌人全部销毁
-                Transform line = barrier.transform.parent;
-                Barrier[] lineBarriers = line.GetComponentsInChildren<Barrier>();
-                foreach (Barrier similar in lineBarriers)
+                //安全检测，确认得到的障碍与被撞击的障碍处于同一行
+                if (similar.Y == barrier.Y)
                 {
-                    //安全检测，确认得到的障碍与被撞击的障碍处于同一行
-                    if (similar.Y == barrier.Y)
-                    {
-                        similar.OnExplode();
-                    }
+                    similar.OnExplode();
                 }
-                //撞击后减少护盾韧性/关闭护盾
-                CloseShield();
             }
-            else if (isSprint && isShield == false)
-            {
-                //如果在冲刺状态，直接撞毁敌人
-                barrier.OnExplode();
-            }
-            else
-            {
-                StartCoroutine(AttackCor(barrier));
-            }
+            //撞击后减少护盾韧性/关闭护盾
+            CloseShield();
+        }
+        else if (isSprint && isShield == false)
+        {
+            //如果在冲刺状态，直接撞毁敌人
+            barrier.OnExplode();
+        }
+        else
+        {
+            StartCoroutine(AttackCor(barrier));
         }
     }
 
@@ -508,45 +534,22 @@ public class Player : MonoBehaviour
     //近战技能（不同角色根据攻击种类不同，需重写该函数
     protected virtual void MeleeSkill(Barrier victim)
     {
-        //测试用近战技能，同时攻击对象的左右障碍
-        Transform line = victim.transform.parent;
-        Barrier[] lineBarriers = line.GetComponentsInChildren<Barrier>();
-        foreach (Barrier implicate in lineBarriers)
-        {
-            //安全检测，确认得到的障碍与被撞击的障碍处于同一行
-            if (implicate.Y == victim.Y)
-            {
-                //判断得到的障碍与被撞击的障碍是否相差一格或两格（这是基于当前4根跑道的操作，如果跑道数量变化，则不可用
-                var dist = Mathf.Abs(implicate.X - victim.X);
-                if (dist == 1 || dist == 2)
-                {
-                    //调用该障碍的被伤害函数
-                    implicate.OnDamage(damage, victim.gameObject);
-                }
-            }
-        }
     }
 
     //远程技能（不同角色根据攻击种类不同，需重写该函数
     protected virtual void RangeSkill()
     {
-        //测试用远程技能，发射子弹进行攻击
-        timer += Time.deltaTime;
-        if (timer >= rangeSkillCoolTime)
-        {
-            timer = 0;
-            //在开火点生成一颗子弹
-            Bullet bullet = (Bullet)Instantiate(bulletPrefab, firePoint.position, Quaternion.identity).GetComponent(typeof(Bullet));
-            bullet.Init(gameObject, Vector2.up, Vector2.up);
-        }
+    }
+    //远程攻击命中敌人
+    public virtual void OnRangeHitBarrier(Barrier barrier, int damage, GameObject instigator)
+    {
+        barrier.OnDamage(damage, gameObject);
     }
 
     //被动技能（不同角色被动技能不同，需重写该函数
     protected virtual void PassiveSkill()
     {
         Debug.Log("----------------------- 被动技能启用 ------------------------");
-        //测试用被动，增加磁铁持续时间
-        magentDuartionRate = 1;
     }
 
     //碰撞检测，只用来检测敌人
@@ -555,8 +558,10 @@ public class Player : MonoBehaviour
         var barrier = other.GetComponent<Barrier>();
         if (barrier != null)
         {
-
-            Attack(barrier);
+            if (OpenCollision())
+            {
+                Attack(barrier);
+            }
         }
     }
 
@@ -568,7 +573,10 @@ public class Player : MonoBehaviour
             //
             if (isHitting == false)
             {
-                Attack(barrier);
+                if (OpenCollision())
+                {
+                    Attack(barrier);
+                }
             }
         }
     }

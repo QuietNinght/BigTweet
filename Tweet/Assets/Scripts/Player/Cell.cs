@@ -17,16 +17,30 @@ public class Cell : MonoBehaviour {
     private float velocityXSmoothing;
     //水平加速时间
     public float accelerationTime = 0.05f;
+    //死亡时使用的材质
+    public Material deadMaterial;
+    //死亡特效
+    public GameObject deadEffect;
 
     private MoveController controller;
     private Vector2 velocity;
+    private SpriteRenderer render;
+    private BoxCollider2D bCollider;
+    private Animator anim;
+
+    void Awake()
+    {
+        controller = GetComponent<MoveController>();
+        render = GetComponentInChildren<SpriteRenderer>();
+        bCollider = GetComponent<BoxCollider2D>();
+        anim = GetComponent<Animator>();
+    }
 
     public void Init(Transform _previous, Vector2 _space)
     {
         previous = _previous;
         offest = _space;
         isMove = true;
-        controller = GetComponent<MoveController>();
     }
 
     public void Refresh(Transform _previous, Vector2 _offest)
@@ -60,8 +74,18 @@ public class Cell : MonoBehaviour {
         }
     }
 
-    public void Move(Vector3 velocity)
+    public void DestroyCell()
     {
-        
+        isMove = false;
+        anim.enabled = false;
+        bCollider.enabled = false;
+
+        render.material = deadMaterial;
+        if(deadEffect != null)
+        {
+            Instantiate(deadEffect, transform.position, Quaternion.identity);
+        }
+
+        Destroy(gameObject, 0.1f);
     }
 }
